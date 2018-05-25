@@ -1,0 +1,5 @@
+PDBFILE mainfile1.pdb 
+VDWFILE /home/kkg/Documents/kgp_summer_internship/naccess//vdw.radii 
+STDFILE /home/kkg/Documents/kgp_summer_internship/naccess//standard.data 
+PROBE 1.40
+ZSLICE 0.05

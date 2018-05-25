@@ -1,0 +1,51 @@
+accall.f:256.72:
+
+     -                 maxx                                             
+                                                                       1
+Error: Nonnegative width required in format string at (1)
+accall.f:323.72:
+
+               read(card(55:60),'(f)')occup(nats)                       
+                                                                       1
+Error: Nonnegative width required in format string at (1)
+accall.f:324.72:
+
+               read(card(61:66),'(f)')bfact(nats)                       
+                                                                       1
+Error: Nonnegative width required in format string at (1)
+accall.f:896.72:
+
+               if (rsec2n.le.0.0) goto10                                
+                                                                       1
+accall.f:947.72:
+
+ 10         enddo                                                       
+                                                                       2
+Warning: Deleted feature: GOTO at (1) jumps to END of construct at (2)
+accall.f:901.72:
+
+               if (d(j).ge.rsecr+rsecn) goto10                          
+                                                                       1
+accall.f:947.72:
+
+ 10         enddo                                                       
+                                                                       2
+Warning: Deleted feature: GOTO at (1) jumps to END of construct at (2)
+accall.f:907.72:
+
+               if (b.le.0.0) goto9                                      
+                                                                       1
+accall.f:981.72:
+
+ 9       enddo                                                          
+                                                                       2
+Warning: Deleted feature: GOTO at (1) jumps to END of construct at (2)
+accall.f:908.72:
+
+               goto10                                                   
+                                                                       1
+accall.f:947.72:
+
+ 10         enddo                                                       
+                                                                       2
+Warning: Deleted feature: GOTO at (1) jumps to END of construct at (2)

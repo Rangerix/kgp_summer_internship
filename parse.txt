@@ -1,0 +1,5 @@
+atomtype
+resiname
+resinum
+atom_no
+x,y,z
