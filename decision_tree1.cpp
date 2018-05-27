@@ -1,3 +1,6 @@
+// the difference between decision_tree.cpp and decision_tree1.cpp is that in later case, the dataset is 
+//represented is as matrix and the last column is represented as label
+
 #include <iostream>
 #include <vector>
 #include <set>
@@ -119,8 +122,7 @@ vector<vector<float> > modify_matrix(vector<vector<float> > matrix,int col_no,fl
 			}
 			new_matrix.push_back(temp_row);
 		}
-		
-		cout<<endl;
+		//cout<<endl;
 	}
 	//print_matrix(new_matrix);
 	return new_matrix;
@@ -128,16 +130,16 @@ vector<vector<float> > modify_matrix(vector<vector<float> > matrix,int col_no,fl
 
 tree_node* build_decision_tree(tree_node* nodeptr,vector<vector<float> > matrix)
 {
-	cout<<"here \n";
+	//cout<<"here \n";
 	print_matrix(matrix);
 	if(matrix.size()<=1){
-		cout<<"here 1\n";
+		//cout<<"here 1\n";
 		return NULL;
 	}
 	else if(isHomogeneous(matrix)){
 		nodeptr->is_leaf=true;
 		nodeptr->label=matrix[0][matrix[0].size()-1];
-		cout<<"here 2\n";
+		//cout<<"here 2\n";
 		return nodeptr;
 	}
 	else{
@@ -145,42 +147,49 @@ tree_node* build_decision_tree(tree_node* nodeptr,vector<vector<float> > matrix)
 		int split_col=decide_split_column(matrix);
 		nodeptr->split_on=split_col;
 		vector<float> temp=get_all_unique_vals(matrix,split_col);
-		cout<<"split_col : "<<split_col<<" \n";
-		cout<<"temp : ";
+		//cout<<"split_col : "<<split_col<<" \n";
+		//cout<<"temp : ";
 		for(int i=0;i<temp.size();i++)
 			cout<<temp[i]<<" ";
 		cout<<endl;
 		for(int i=0;i<temp.size();i++){
 			tree_node* child_node=(tree_node*) new tree_node;
-			cout<<"here 3\n";
+			//cout<<"here 3\n";
 			child_node->label=temp[i];
 			nodeptr->childrenValues.push_back(temp[i]);
-			cout<<"here 4";
+			//cout<<"here 4";
 			child_node->is_leaf=false;
 			child_node->split_on=split_col;
-			cout<<"here 5";
+			//cout<<"here 5";
 			vector<vector<float> > new_matrix=modify_matrix(matrix,split_col,temp[i]);
-			cout<<"here 6";
-			cout<<"\n temp[i] = "<<temp[i]<<endl;
+			//cout<<"here 6";
+			//cout<<"\n temp[i] = "<<temp[i]<<endl;
 			//print_matrix(new_matrix);
 			nodeptr->children.push_back(build_decision_tree(child_node,new_matrix));
-			cout<<"here 7";
+			//cout<<"here 7";
 		}
 	}
 	return nodeptr;
 }
 
 void print_decision_tree(tree_node* nodeptr){
+	cout<<endl;	
 	if(nodeptr==NULL) return;
 	else if(nodeptr->is_leaf==true){
+		cout<<"this is a leaf \n";
 		cout<<"predicted label : "<<nodeptr->label<<endl;
 	}
 	else{
-		cout << " value: " << nodeptr->label << endl;
+		cout << "value: " << nodeptr->label << endl;
 		cout << "Split on: " << nodeptr->split_on;
+		cout << "this node has children : \n";
 		int iii;
+		for(iii=0;iii<nodeptr->childrenValues.size();iii++){
+			cout<<nodeptr->childrenValues[iii]<<",";
+		}
+		cout<<endl;
 		for (iii = 0; iii < nodeptr->children.size(); iii++) {   
-			cout << "\t";
+			cout <<"  ";
 			print_decision_tree(nodeptr->children[iii]);
 		}
 	}
@@ -212,25 +221,38 @@ float find_most_frequent_class(vector<vector<float> > matrix)
 	}
 	return highest_class;
 }
-int test_data_on_decision_tree(vector<float> sample, tree_node* nodeptr,int default_label)
+float test_data_on_decision_tree(vector<float> sample, tree_node* nodeptr,float default_label)
 {
-	int predicted_label;
-	while(!nodeptr->is_leaf && !nodeptr->children.empty())
+	cout<<"inside test_data_on_decision_tree : ";
+	float predicted_label;
+	if(nodeptr->is_leaf==true){
+		return nodeptr->label;
+	}
+	vector<float> temp=sample;
+	while(!nodeptr->is_leaf)
 	{
-		int value=sample[nodeptr->split_on];
-		int child_index;
-		for(int i=0;i<nodeptr->childrenValues.size();i++)
+		int value=temp[nodeptr->split_on];
+		temp.erase(temp.begin()+nodeptr->split_on);
+		int i,child_index;
+		for(i=0;i<nodeptr->childrenValues.size();i++){
 			if(nodeptr->childrenValues[i]==value){
 				child_index=i;
 				break;
 			}
+		}
+		if(i==nodeptr->childrenValues.size())
+			return default_label;
 		nodeptr=nodeptr->children[child_index];
-		if(nodeptr==NULL){
+		/*if(nodeptr==NULL){
 			predicted_label=default_label;
 			break;
-		}
+		}*/
 		predicted_label=nodeptr->label;
 	}
+	if(nodeptr->is_leaf==true){
+		return nodeptr->label;
+	}
+	cout<<predicted_label<<endl;
 	return predicted_label;
 }
 
@@ -250,7 +272,8 @@ void calculate_accuracy(vector<float> a,vector<float> b)
 }
 
 int main(){
-	int row,col,a,i,j;
+	int row,col,i,j;
+	float a;
 	cout<<"row : ";
 	cin>>row;
 	cout<<"col : ";
@@ -285,6 +308,7 @@ int main(){
 			test_matrix[i].push_back(a);
 		}
 	}
+	cout<<"test matrix formed \n";
 	vector<float> given_label;
 	vector<float> predicted_label;
 	for(i=0;i<test_matrix.size();i++){
@@ -292,7 +316,9 @@ int main(){
 	}
 	//test using the decision tree model
 	for(i=0;i<test_matrix.size();i++){
-		float pred_label=test_data_on_decision_tree(test_matrix[i],root,most_frequent_class);
+		cout<<"test sample "<<i<<endl;
+		vector<float> temp_row=test_matrix[i];
+		float pred_label=test_data_on_decision_tree(temp_row,root,most_frequent_class);
 		predicted_label.push_back(pred_label);
 	}
 	calculate_accuracy(given_label,predicted_label);

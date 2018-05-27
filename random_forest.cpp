@@ -62,7 +62,7 @@ float find_most_frequent_value(vector<float> label)
 	return highest_class;
 }
 
-vector<float> predict_label(vector<vector<float> > matrix,vector<tree_node*> forest)
+vector<float> predict_label(vector<vector<float> > matrix,vector<tree_node*> forest,vector<float> most_frequent_class_submat)
 {
 	int i,j,k;
 	vector<float> vec;
@@ -70,7 +70,7 @@ vector<float> predict_label(vector<vector<float> > matrix,vector<tree_node*> for
 	for(i=0;i<matrix.size();i++){
 		vector<float> predicted_label;
 		for(j=0;j<forest.size();j++){
-			float pred_label=(test_data_on_decision_tree(matrix[i],forest[j],most_frequent_class));
+			float pred_label=(test_data_on_decision_tree(matrix[i],forest[j],most_frequent_class_submat[j]));
 			predicted_label.push_back(pred_label);
 			//here I need to work on the most_frequent_class , 
 			//instead of using the most frequent class of the whole matrix, the most frequent class of the submatrices
@@ -85,19 +85,20 @@ void random_forest(vector<vector<float> > matrix){
 	int samples=matrix.size();
 	int features=matrix[0].size();
 	vector<bool> visited(samples,false);			//we have to visit all the samples
-	int no_tree=log2(samples)+1;
+	int no_tree=50;
 	vector<tree_node*> forest(no_tree);
 	int i,j;
 	int samples_per_tree;
-	cout<<"enter number of samples in a decision tree : ";
-	cin>>samples_per_tree;
-
+	//cout<<"enter number of samples in a decision tree : ";
+	samples_per_tree=log2(samples)+1;
+	vector<float> most_frequent_class_submat;
 	for(i=0;i<no_tree;i++)
 	{
 		vector<vector<float> >new_matrix=build_random_matrix(matrix,samples_per_tree);
 		tree_node* root= new tree_node;
 		root=build_decision_tree(root,new_matrix);
 		forest[i]=root;
+		most_frequent_class_submat.push_back(find_most_frequent_class(new_matrix));
 		cout<<"forest "<<i<<" formed \n";
 	}
 
@@ -116,7 +117,7 @@ void random_forest(vector<vector<float> > matrix){
 			test_matrix[i].push_back(a);
 		}
 	}
-	vector<float> predicted_label=predict_label(test_matrix,forest);
+	vector<float> predicted_label=predict_label(test_matrix,forest,most_frequent_class_submat);
 	cout<<endl;
 	for(i=0;i<predicted_label.size();i++)
 		cout<<predicted_label[i]<<endl;
