@@ -6,6 +6,7 @@
 #include <set>
 #include <map>
 #include <sstream>
+#include <fstream>
 #include "entropy.h"
 using namespace std;
 
@@ -237,30 +238,37 @@ float find_most_frequent_class(vector<vector<float> > matrix)
 }
 float test_data_on_decision_tree(vector<float> sample, tree_node* nodeptr,float default_label)
 {
-	cout<<"inside test_data_on_decision_tree : \n";
+	//cout<<"inside test_data_on_decision_tree : \n";
 	float predicted_label;
+	//cout<<"am I here ? ";
 	if(nodeptr->is_leaf==true){
 		return nodeptr->label;
 	}
 	vector<float> temp=sample;
+	//cout<<"here atleast : \n";
 	while(!nodeptr->is_leaf)
 	{
-		int value=temp[nodeptr->split_on];
-		temp.erase(temp.begin()+nodeptr->split_on);
-		int i,child_index;
+		float value=temp[nodeptr->split_on];
+		//cout<<"split_on : "<<nodeptr->split_on<<endl;
+		temp.erase(temp.begin()+(nodeptr->split_on));
+		//cout<<"value in test : "<<value<<endl;
+		int i,child_index=-1;
+		//cout<<"children values : \n";
 		for(i=0;i<nodeptr->childrenValues.size();i++){
+			//cout<<(nodeptr->childrenValues[i])<<" ";
 			if(nodeptr->childrenValues[i]==value){
 				child_index=i;
 				break;
 			}
 		}
-		if(i==nodeptr->childrenValues.size())
+		//cout<<endl;
+		//cout<<"child_index : "<<child_index<<endl;
+		if(child_index==-1)
 			return default_label;
-		nodeptr=nodeptr->children[child_index];
-		/*if(nodeptr==NULL){
-			predicted_label=default_label;
-			break;
-		}*/
+		nodeptr=(nodeptr->children[child_index]);
+		if(nodeptr==NULL){
+			return default_label;
+		}
 		predicted_label=nodeptr->label;
 	}
 	if(nodeptr->is_leaf==true){
@@ -274,15 +282,19 @@ void calculate_accuracy(vector<float> a,vector<float> b)
 {
 	int i,j,count;
 	cout<<endl;
+	char accu[]="accuracy.txt";
+	ofstream out(accu);
 	for(i=0;i<a.size();i++)
 	{
-		cout<<a[i]<<"   "<<b[i]<<endl;
+		out<<a[i]<<"   "<<b[i]<<endl;
 		if(a[i]==b[i])
 			count++;
 	}
-	cout<<endl;
+	out<<endl;
 	cout<<"accuracy : "<<(float)count/a.size();
+	out<<"accuracy : "<<(float)count/a.size();
 	cout<<endl;
+	out.close();
 }
 
 float main_dec_tree(char trainfilename[20],char testfilename[20]){
@@ -314,13 +326,15 @@ float main_dec_tree(char trainfilename[20],char testfilename[20]){
 		matrix.push_back(vec);
 	}
 	inputstr.close();
+
+	
 	float most_frequent_class=find_most_frequent_class(matrix);
 	cout<<"most_frequent_class : "<<most_frequent_class<<endl;
 	cout<<"build_decision_tree is called \n";
 	tree_node* root= new tree_node;
 	root=build_decision_tree(root,matrix);
 	cout<<endl;	
-	print_decision_tree(root);
+	//print_decision_tree(root);
 	cout<<endl;
 	cout<<"decision tree formed \n";
 
@@ -344,27 +358,32 @@ float main_dec_tree(char trainfilename[20],char testfilename[20]){
 		cout<<"cannot open testfile ";
 		return 0;
 	}
+
+	vector<float> given_label;
+	vector<float> predicted_label;
 	vector<vector<float> > test_matrix;
 	string mystrtest;
 	while(getline(inputstr,mystrtest)){
 		vector<float> vec=parsestring(mystrtest);
-		test_matrix.push_back(vec);
+		given_label.push_back(vec[vec.size()-1]);
+		float pred_label=test_data_on_decision_tree(vec,root,most_frequent_class);
+		//cout<<given_label.back()<<" , "<<pred_label<<endl;
+		predicted_label.push_back(pred_label);
+		//test_matrix.push_back(vec);
 	}
 	inputstr.close();
 
 
-	vector<float> given_label;
-	vector<float> predicted_label;
-	for(i=0;i<test_matrix.size();i++){
+	/*for(i=0;i<test_matrix.size();i++){
 		given_label.push_back(test_matrix[i][test_matrix[i].size()-1]);
 	}
 	cout<<"given_label considered\n";
 	//test using the decision tree model
 	for(i=0;i<test_matrix.size();i++){
-		//cout<<"predicted_label for "<<i;
 		float pred_label=test_data_on_decision_tree(test_matrix[i],root,most_frequent_class);
+		cout<<"predicted_label for "<<i<<endl;
 		predicted_label.push_back(pred_label);
-	}
+	}*/
 	calculate_accuracy(given_label,predicted_label);
 
 return 0;

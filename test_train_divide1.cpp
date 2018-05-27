@@ -1,3 +1,4 @@
+//using array instead of vector 
 #include <iostream>
 #include <vector>
 #include <sstream>
@@ -13,14 +14,18 @@ int main()
 	cin>>filename;
 	ifstream inputstr;
 	inputstr.open(filename);
-	vector<vector<float> > dataset;
+	
+	//vector<vector<float> > dataset;
 	string mystr;
+	int i,j,linecount=0;
 	while(getline(inputstr,mystr)){
-		vector<float> vec=parsestring(mystr);
-		dataset.push_back(vec);
+		linecount++;
 	}
 	inputstr.close();
-	cout<<"dataset size : "<<dataset.size()<< " , "<<dataset[0].size()<<endl;
+	float** dataset=new float*[linecount];
+	for(i=0;i<linecount;i++){
+		dataset[i]=new float[11];
+	}
 	/*for(int i=0;i<dataset.size();i++){
 		for(int j=0;j<dataset[i].size();j++){
 			cout<<dataset[i][j]<<" ";
@@ -29,12 +34,12 @@ int main()
 	}
 	cout<<endl;
 	*/
-	int crossvalidation=4;
-	int testrow=dataset.size()/crossvalidation;						//no of rows in train data
-	int trainrow=dataset.size()-testrow;
+	int crossvalidation=10;
+	int testrow=linecount/crossvalidation;						//no of rows in train data
+	int trainrow=linecount-testrow;
 	cout<<"testdata size : "<<testrow<<endl;
 	vector<int> testrows(testrow,-1);								//randomly generate testrows
-	for(int i = 0; i<testrow; ++i)
+	for(i = 0; i<testrow; ++i)
 	{
 	   int r;
 	   int flag=1;
@@ -42,7 +47,7 @@ int main()
 	   {
 	   		clock_t t = clock();
 			srand((int)t);
-	      	r = rand()%dataset.size();
+	      	r = rand()%linecount;
 	      	for(int j=0;j<testrow;j++){
 	      		if(testrows[j]==r){
 					flag=1;	  
@@ -60,17 +65,27 @@ int main()
 	cout<<endl;
 	*/
 	cout<<"preparing  test data ...\n";
-	vector<vector<float> > testdata(testrow);
-	for(int i=0;i<testrow;i++){
-		testdata[i]=dataset[testrows[i]];
+	float testdata[testrow][11];
+	for(i=0;i<testrow;i++){
+		int rowno=testrows[i];
+		for(j=0;j<11;j++)
+			testdata[i][j]=dataset[rowno][j];
+	}
+	float trainrowind[linecount]={1};
+	for(i=0;i<testrow;i++){
+		trainrowind[testrows[i]]=0;
 	}
 	cout<<"preparing train data ...\n";
-	vector<vector<float> > traindata=dataset;
-	for(int i=0;i<testrow;i++)
+	float traindata[trainrow][11];
+	int traindataindex=0;
+	for(i=0;i<linecount;i++)
 	{
-		int idx=testrows[i];
-		traindata[idx]=traindata.back();
-		traindata.pop_back();
+		if(trainrowind[i]){					//then the row must be in train dataset
+			for(j=0;j<11;j++){
+				traindata[traindataindex][j]=dataset[i][j];
+			}
+			traindataindex++;
+		}
 	}
 	/*for(int i=0;i<traindata.size();i++){
 		for(int j=0;j<traindata[i].size();j++){
@@ -88,9 +103,7 @@ int main()
 	cout<<endl;
 	*/
 											
-	int i,j;
-
-
+	delete dataset;
 	
 	cout<<"writing testdata into file \n";
 	char testfilename[20];
@@ -100,12 +113,13 @@ int main()
 	}
 	testfilename[i]='\0';
 	fstream teststream(testfilename,ios::out);
+	cout<<"here I am";
 	if(!teststream){
 		cout<<"cannot open testsile\n";
 		return 0;
 	}
-	for(i=0;i<testdata.size();i++){
-		for(j=0;j<testdata[i].size();j++){
+	for(i=0;i<testrow;i++){
+		for(j=0;j<11;j++){
 			teststream<<testdata[i][j]<<" ";
 		}
 		teststream<<endl;
@@ -125,15 +139,15 @@ int main()
 		cout<<"cannot open trainfile \n";
 		return 0;
 	}
-	for(i=0;i<traindata.size();i++){
-		for(j=0;j<traindata[i].size();j++){
+	for(i=0;i<trainrow;i++){
+		for(j=0;j<11;j++){
 			trainstream<<traindata[i][j]<<" ";
 		}
 		trainstream<<"\n";
 	}	
 	trainstream.close();
 
-	cout<<"decision_tree function is called ... \n";
-	main_dec_tree(trainfilename,testfilename);
+	//cout<<"decision_tree function is called ... \n";
+	//main_dec_tree(trainfilename,testfilename);
 return 0;
 }

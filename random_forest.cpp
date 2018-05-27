@@ -1,3 +1,4 @@
+//randomizing the samples
 #include "decision_tree1.h"
 #include <cstdlib>
 using namespace std;
