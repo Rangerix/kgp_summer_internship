@@ -1,6 +1,10 @@
 // the difference between decision_tree.cpp and decision_tree1.cpp is that in later case, the matrix is 
 //represented is as matrix and the last column is represented as label
 
+//this is the modified version of decision_tree1.h
+//here, instead of calculating the accuracy, the predicted labels are being stored in a file 
+//named, "predicted_labels.txt"
+
 #include <iostream>
 #include <vector>
 #include <set>
@@ -21,31 +25,21 @@ struct tree_node
 	vector<tree_node*> children;
 };
 
-vector<float> parsestring(string str)
-{
-	istringstream mystream(str);
-	float a;
-	vector<float> vec;
-	while(mystream>>a){
-		vec.push_back(a);
-	}
-	return vec;
-}
 
-void print_matrix(vector<vector<float> > matrix){
+void print_matrix(vector<float>* matrix){
 	cout<<endl;
-	for(int i=0;i<matrix.size();i++){
+	int matsize=sizeof(matrix)/sizeof(matrix[0]);
+	for(int i=0;i<matsize;i++){
 		for(int j=0;j<matrix[i].size();j++)
 			cout<<matrix[i][j]<<" ";
 		cout<<endl;
 	}
 	cout<<endl;
 }
-vector<float> get_all_unique_vals(vector<vector<float> > matrix, int index)
+vector<float> get_all_unique_vals(int matsize,vector<float> * matrix, int index)
 {
 	vector<float> temp;
-	int size=matrix.size();
-	for(int i=0;i<size;i++){
+	for(int i=0;i<matsize;i++){
 		temp.push_back( matrix[i][index] );
 	}
 	/*cout<<"temp vector: ";
@@ -57,10 +51,10 @@ vector<float> get_all_unique_vals(vector<vector<float> > matrix, int index)
 	return vec;
 }
 
-int decide_split_column(vector<vector<float> > matrix)
+int decide_split_column(int matsize,vector<float> * matrix)
 {
 	int features=matrix[0].size()-1;
-	int samples=matrix.size();
+	int samples=matsize;
 	int i,j;
 	/*cout<<endl;
 	for(i=0;i<samples;i++){
@@ -100,41 +94,47 @@ int decide_split_column(vector<vector<float> > matrix)
 	}
 	return max_index;
 }
-bool matrixIsEmpty(vector<vector<float> > matrix)
-{
-	return (matrix.size() <= 1 );
-}
-bool isHomogeneous(vector<vector<float> > matrix)
+
+bool isHomogeneous(int matsize,vector<float> * matrix)
 {
 	int iii;
-	vector<float> label;
-	for(int i=0;i<matrix.size();i++){
-		label.push_back(matrix[i][matrix[i].size()-1]);
-	}
-	float firstValue = label[0];
-	for (iii = 1; iii < label.size(); iii++) {
-		if (firstValue != label[iii]) {
+	float firstValue = matrix[0][matrix[0].size()-1];
+	for (iii = 1; iii < matsize; iii++) {
+		if (firstValue != matrix[iii][matrix[iii].size()-1]) {
 			return false;
 		}
 	}
 	return true;
 }
 
-vector<vector<float> > modify_matrix(vector<vector<float> > matrix,int col_no,float value){
+vector<float>* modify_matrix(int matsize,vector<float> *matrix,int col_no,float value,int & new_mat_size){
 	int i,j,k,l;
 	int row=0;
 	//count no of rows in the new matrix
-	vector<vector<float> > new_matrix;
-	for(i=0;i<matrix.size();i++){
+	new_mat_size=0;
+	for(i=0;i<matsize;i++)
+		if(matrix[i][col_no]==value)
+			new_mat_size++;
+	
+	int colcount=matrix[0].size()-1;			//since we are removing one column
+
+	vector<float>* new_matrix=new vector<float>[new_mat_size];
+	for(i=0;i<new_mat_size;i++)
+		new_matrix[i].assign(colcount,0);
+
+	k=0;l=0;
+	for(i=0;i<matsize;i++){
 		if(matrix[i][col_no]==value){
-			vector<float> temp_row;
+			//vector<float> temp_row;
+			l=0;
 			for(j=0;j<matrix[i].size();j++){
 				if(j!=col_no){
 					//cout<<matrix[i][j]<<" ";
-					temp_row.push_back(matrix[i][j]);
+					//temp_row.push_back(matrix[i][j]);
+					new_matrix[k][l++]=matrix[i][j];
 				}
 			}
-			new_matrix.push_back(temp_row);
+			k++;
 		}
 		//cout<<endl;
 	}
@@ -142,15 +142,17 @@ vector<vector<float> > modify_matrix(vector<vector<float> > matrix,int col_no,fl
 	return new_matrix;
 }
 
-tree_node* build_decision_tree(tree_node* nodeptr,vector<vector<float> > matrix)
+tree_node* build_decision_tree(int matsize,tree_node* nodeptr,vector<float>* matrix)
 {
 	//cout<<"here \n";
 	//print_matrix(matrix);
-	if(matrix.size()<=1){
+	//int matsize=sizeof(matrix)/(matrix[0].size());
+	//cout<<"matsize : "<<matsize<<endl;
+	if(matsize<=1){
 		//cout<<"here 1\n";
 		return NULL;
 	}
-	else if(isHomogeneous(matrix)){
+	else if(isHomogeneous(matsize,matrix)){
 		nodeptr->is_leaf=true;
 		nodeptr->label=matrix[0][matrix[0].size()-1];
 		//cout<<"here 2\n";
@@ -158,9 +160,9 @@ tree_node* build_decision_tree(tree_node* nodeptr,vector<vector<float> > matrix)
 	}
 	else{
 		nodeptr->is_leaf=false;
-		int split_col=decide_split_column(matrix);
+		int split_col=decide_split_column(matsize,matrix);
 		nodeptr->split_on=split_col;
-		vector<float> temp=get_all_unique_vals(matrix,split_col);
+		vector<float> temp=get_all_unique_vals(matsize,matrix,split_col);
 		//cout<<"split_col : "<<split_col<<" \n";
 		//cout<<"temp : ";
 		/*for(int i=0;i<temp.size();i++)
@@ -175,11 +177,12 @@ tree_node* build_decision_tree(tree_node* nodeptr,vector<vector<float> > matrix)
 			child_node->is_leaf=false;
 			child_node->split_on=split_col;
 			//cout<<"here 5";
-			vector<vector<float> > new_matrix=modify_matrix(matrix,split_col,temp[i]);
+			int new_mat_size=0;
+			vector<float> * new_matrix=modify_matrix(matsize,matrix,split_col,temp[i],new_mat_size);
 			//cout<<"here 6";
 			//cout<<"\n temp[i] = "<<temp[i]<<endl;
 			//print_matrix(new_matrix);
-			nodeptr->children.push_back(build_decision_tree(child_node,new_matrix));
+			nodeptr->children.push_back(build_decision_tree(new_mat_size,child_node,new_matrix));
 			//cout<<"here 7";
 		}
 	}
@@ -209,11 +212,11 @@ void print_decision_tree(tree_node* nodeptr){
 		}
 	}
 }
-float find_most_frequent_class(vector<vector<float> > matrix)
+float find_most_frequent_class(int matsize,vector<float> * matrix)
 {
 	vector<float> label;
 	int i;
-	for(i=0;i<matrix.size();i++){
+	/*for(i=0;i<matsize;i++){
 		label.push_back(matrix[i][matrix[i].size()-1]);
 	}
 	map<float,int> count;
@@ -233,8 +236,19 @@ float find_most_frequent_class(vector<vector<float> > matrix)
 			highest_count=itr->second;
 			highest_class=itr->first;
 		}
+	}*/
+
+	//since I know that this is a two class problem, I'm using this
+	int one=0,two=0;
+	for(i=0;i<matsize;i++){
+		if(matrix[i][matrix[i].size()-1]==1)
+			one++;
+		else 
+			two++;
 	}
-	return highest_class;
+	//return highest_class;
+	if(one>two) return 1;
+	return 2;
 }
 float test_data_on_decision_tree(vector<float> sample, tree_node* nodeptr,float default_label)
 {
@@ -278,27 +292,38 @@ float test_data_on_decision_tree(vector<float> sample, tree_node* nodeptr,float 
 	return predicted_label;
 }
 
-void calculate_accuracy(vector<float> a,vector<float> b)
+void calculate_accuracy(int size,float *a,float *b)
 {
 	int i,j,count;
 	cout<<endl;
 	char accu[]="accuracy.txt";
 	ofstream out(accu);
-	for(i=0;i<a.size();i++)
+	cout<<"size of the label : "<<size<<endl;
+	for(i=0;i<size;i++)
 	{
 		out<<a[i]<<"   "<<b[i]<<endl;
 		if(a[i]==b[i])
 			count++;
 	}
 	out<<endl;
-	out<<"correctly classified "<<count<<" out of "<<a.size()<<endl;
-	cout<<"accuracy : "<<(float)count/a.size();
-	out<<"accuracy : "<<(float)count/a.size();
+	out<<"correctly classified "<<count<<" out of "<<size<<endl;
+	cout<<"accuracy : "<<(float)count/size;
+	out<<"accuracy : "<<(float)count/size;
 	cout<<endl;
 	out.close();
 }
 
-float main_dec_tree(char trainfilename[20],char testfilename[20]){
+void store_predicted_labels(int size,float* a){
+	ofstream mystream("predicted_labels.txt",ios::out|ios::app);
+	int i;
+	for(i=0;i<size;i++){
+		mystream<<a[i]<<" ";
+	}
+	mystream<<endl;
+	mystream.close();
+}
+
+float main_function(char trainfilename[20],char testfilename[20],int cccc=5){
 	int row,col,i,j;
 	float a;
 	/*cout<<"row : ";
@@ -313,29 +338,38 @@ float main_dec_tree(char trainfilename[20],char testfilename[20]){
 			matrix[i].push_back(a);
 		}
 	}*/
-	cout<<"reading trainfile \n";
-	ifstream inputstr;
-	inputstr.open(trainfilename);
-	if(!inputstr){
-		cout<<"cannot open trainfile ";
-		return 0;
-	}
-	vector<vector<float> > matrix;
-	string mystr;
-	while(getline(inputstr,mystr)){
-		vector<float> vec=parsestring(mystr);
-		matrix.push_back(vec);
-	}
-	inputstr.close();
+	int colsize=cccc;
 
+	cout<<"reading trainfile \n";
+	FILE *fp;
+	fp=fopen(trainfilename,"r");
+	int trainsize=0;
+	char c;
+	for(c=getc(fp);c!=EOF;c=getc(fp)){
+		if(c=='\n') trainsize++;
+	}
+	fclose(fp);
+	cout<<"trainsize : "<<trainsize<<endl;
+	vector<float> *matrix=new vector<float>[trainsize];
+	for(i=0;i<trainsize;i++){
+		matrix[i].assign(colsize,0);
+	}
+	fp=fopen(trainfilename,"r");
+	for(i=0;i<trainsize;i++){
+		for(j=0;j<colsize;j++){
+			fscanf(fp,"%f ",&matrix[i][j]);
+		}
+	}
+	fclose(fp);
+	cout<<"trainfile reading done ...";
 	
-	float most_frequent_class=find_most_frequent_class(matrix);
+	float most_frequent_class=find_most_frequent_class(trainsize,matrix);
 	cout<<"most_frequent_class : "<<most_frequent_class<<endl;
 	cout<<"build_decision_tree is called \n";
 	tree_node* root= new tree_node;
-	root=build_decision_tree(root,matrix);
+	root=build_decision_tree(trainsize,root,matrix);
 	cout<<endl;	
-	print_decision_tree(root);
+	//print_decision_tree(root);
 	cout<<endl;
 	cout<<"decision tree formed \n";
 
@@ -353,39 +387,49 @@ float main_dec_tree(char trainfilename[20],char testfilename[20]){
 			test_matrix[i].push_back(a);
 		}
 	}*/
+	int testsize=0;
 	cout<<"reading testfile\n";
-	inputstr.open(testfilename);
-	if(!inputstr){
-		cout<<"cannot open testfile ";
-		return 0;
+	fp=fopen(testfilename,"r");
+	for(c=getc(fp);c!=EOF;c=getc(fp)){
+		if(c=='\n') testsize++; 
+	}
+	fclose(fp);
+
+	float *given_label=new float[testsize];
+	float *predicted_label=new float[testsize];
+	vector<float> * test_matrix=new vector<float>[testsize];
+	for(i=0;i<testsize;i++){
+		test_matrix[i].assign(colsize,0);											//colsize==11
 	}
 
-	vector<float> given_label;
-	vector<float> predicted_label;
-	vector<vector<float> > test_matrix;
-	string mystrtest;
-	while(getline(inputstr,mystrtest)){
-		vector<float> vec=parsestring(mystrtest);
-		given_label.push_back(vec[vec.size()-1]);
+	cout<<"testsize : "<<testsize<<endl;
+	fp=fopen(testfilename,"r");
+	for(i=0;i<testsize;i++){
+		for(j=0;j<colsize;j++){
+			fscanf(fp,"%f ",&test_matrix[i][j]);
+		}
+		given_label[i]=test_matrix[i][colsize-1];
+		vector<float> vec=test_matrix[i];
 		float pred_label=test_data_on_decision_tree(vec,root,most_frequent_class);
 		//cout<<given_label.back()<<" , "<<pred_label<<endl;
-		predicted_label.push_back(pred_label);
+		predicted_label[i]=pred_label;
 		//test_matrix.push_back(vec);
 	}
-	inputstr.close();
+	fclose(fp);
 
 
-	/*for(i=0;i<test_matrix.size();i++){
-		given_label.push_back(test_matrix[i][test_matrix[i].size()-1]);
-	}
-	cout<<"given_label considered\n";
-	//test using the decision tree model
-	for(i=0;i<test_matrix.size();i++){
-		float pred_label=test_data_on_decision_tree(test_matrix[i],root,most_frequent_class);
-		cout<<"predicted_label for "<<i<<endl;
-		predicted_label.push_back(pred_label);
-	}*/
-	calculate_accuracy(given_label,predicted_label);
-
+	
+	calculate_accuracy(testsize,given_label,predicted_label);
+	store_predicted_labels(testsize,predicted_label);
 return 0;
 }
+
+/*int main(int argc,char* argv[]){
+	if(argc!=3){
+		cout<<"./a.out trainfile.txt testfile.txt\n";
+		return 0;
+	}
+	main_function(argv[1],argv[2]);
+return 0;
+}
+*/

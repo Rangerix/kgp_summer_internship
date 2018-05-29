@@ -1,0 +1,16 @@
+1. generate a test train division using test_train_divide3 or 4
+2. no_of_trees=100;
+3. no_of_featres_per_tree(p)=4 (log2FEATURES + 1)
+4. generate p random numbers
+5. create subtrain and subtest 
+6. create decision tree
+7. use the subtest file to generate predicted labels
+8. goto step 5 , 50 times
+9. consider the predicted_labels file
+10. determine predicted_label considering frequency
+11. compare it with given_labels from test file.
+12. calculate accurcy
+
+
+72 
+67
