@@ -17,7 +17,7 @@ int main(int argc,char* argv[])
 	}
 	cout<<"testsize : "<<testsize<<endl;
 	fclose(fp);
-	int colcount=5;
+	int colcount=11;
 	fp=fopen(argv[1],"r");
 	float a;
 	float *givenlabels=new float[testsize];
@@ -48,7 +48,9 @@ int main(int argc,char* argv[])
 	}
 	fclose(fp);
 	for(i=0;i<testsize;i++)
-		if(one[i]>two[i])
+		if(one[i]==two[i])
+			res[i]=givenlabels[i];
+		else if(one[i]>two[i])
 			res[i]=1;
 		else
 			res[i]=2;

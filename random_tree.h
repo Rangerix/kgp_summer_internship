@@ -144,18 +144,20 @@ vector<float>* modify_matrix(int matsize,vector<float> *matrix,int col_no,float 
 
 tree_node* build_decision_tree(int matsize,tree_node* nodeptr,vector<float>* matrix)
 {
-	//cout<<"here \n";
-	//print_matrix(matrix);
-	//int matsize=sizeof(matrix)/(matrix[0].size());
+	//print_matrix(matsize,matrix);
 	//cout<<"matsize : "<<matsize<<endl;
-	if(matsize<=1){
-		//cout<<"here 1\n";
+	if(matsize==1&&matrix[0].size()==2)	//then leaf
+	{
+		nodeptr->is_leaf=true;
+		nodeptr->label=matrix[0][1];
+		return nodeptr;
+	}
+	else if(matrix[0].size()<=1){
 		return NULL;
 	}
 	else if(isHomogeneous(matsize,matrix)){
 		nodeptr->is_leaf=true;
 		nodeptr->label=matrix[0][matrix[0].size()-1];
-		//cout<<"here 2\n";
 		return nodeptr;
 	}
 	else{
@@ -247,6 +249,10 @@ float find_most_frequent_class(int matsize,vector<float> * matrix)
 			two++;
 	}
 	//return highest_class;
+	if(one==two){
+		cout<<"both labels are of equal frequency, we can use any as default\n";
+		return 0;		//0 is returned here, this is always a match
+	}
 	if(one>two) return 1;
 	return 2;
 }
@@ -323,101 +329,35 @@ void store_predicted_labels(int size,float* a){
 	mystream.close();
 }
 
-float main_function(char trainfilename[20],char testfilename[20],int cccc=5){
+float main_function(int trainsize,int testsize,int cccc,vector<float>* traindata,vector<float>* testdata){
 	int row,col,i,j;
 	float a;
-	/*cout<<"row : ";
-	cin>>row;
-	cout<<"col : ";
-	cin>>col;
-	vector<vector<float> > matrix(row);
-	cout<<"enter matrix : \n";
-	for(i=0;i<row;i++){
-		for(j=0;j<col;j++){
-			cin>>a;
-			matrix[i].push_back(a);
-		}
-	}*/
 	int colsize=cccc;
-
-	cout<<"reading trainfile \n";
-	FILE *fp;
-	fp=fopen(trainfilename,"r");
-	int trainsize=0;
-	char c;
-	for(c=getc(fp);c!=EOF;c=getc(fp)){
-		if(c=='\n') trainsize++;
-	}
-	fclose(fp);
-	cout<<"trainsize : "<<trainsize<<endl;
-	vector<float> *matrix=new vector<float>[trainsize];
-	for(i=0;i<trainsize;i++){
-		matrix[i].assign(colsize,0);
-	}
-	fp=fopen(trainfilename,"r");
-	for(i=0;i<trainsize;i++){
-		for(j=0;j<colsize;j++){
-			fscanf(fp,"%f ",&matrix[i][j]);
-		}
-	}
-	fclose(fp);
-	cout<<"trainfile reading done ...";
 	
-	float most_frequent_class=find_most_frequent_class(trainsize,matrix);
+	float most_frequent_class=find_most_frequent_class(trainsize,traindata);
 	cout<<"most_frequent_class : "<<most_frequent_class<<endl;
 	cout<<"build_decision_tree is called \n";
+	clock_t start,end;
+	start=clock();
 	tree_node* root= new tree_node;
-	root=build_decision_tree(trainsize,root,matrix);
+	root=build_decision_tree(trainsize,root,traindata);
+	end=clock();
 	cout<<endl;	
+	cout<<"time taken to build_decision_tree : "<<(double)(end-start)/CLOCKS_PER_SEC<<endl;
 	//print_decision_tree(root);
 	cout<<endl;
 	cout<<"decision tree formed \n";
 
-/*
-	cout<<"enter test matrix : \n";
-	cout<<"row : ";
-	cin>>row;
-	cout<<"col : ";
-	cin>>col;
-	vector<vector<float> > test_matrix(row);
-	cout<<"enter matrix : \n";
-	for(i=0;i<row;i++){
-		for(j=0;j<col;j++){
-			cin>>a;
-			test_matrix[i].push_back(a);
-		}
-	}*/
-	int testsize=0;
-	cout<<"reading testfile\n";
-	fp=fopen(testfilename,"r");
-	for(c=getc(fp);c!=EOF;c=getc(fp)){
-		if(c=='\n') testsize++; 
-	}
-	fclose(fp);
-
-	float *given_label=new float[testsize];
-	float *predicted_label=new float[testsize];
-	vector<float> * test_matrix=new vector<float>[testsize];
+	float* given_label=new float[testsize];
+	float* predicted_label=new float[testsize];
+	//cout<<"testsize : "<<testsize<<endl;
 	for(i=0;i<testsize;i++){
-		test_matrix[i].assign(colsize,0);											//colsize==11
-	}
-
-	cout<<"testsize : "<<testsize<<endl;
-	fp=fopen(testfilename,"r");
-	for(i=0;i<testsize;i++){
-		for(j=0;j<colsize;j++){
-			fscanf(fp,"%f ",&test_matrix[i][j]);
-		}
-		given_label[i]=test_matrix[i][colsize-1];
-		vector<float> vec=test_matrix[i];
+		given_label[i]=testdata[i][colsize-1];
+		vector<float> vec=testdata[i];
 		float pred_label=test_data_on_decision_tree(vec,root,most_frequent_class);
-		//cout<<given_label.back()<<" , "<<pred_label<<endl;
+		if(pred_label==0) pred_label=given_label[i];
 		predicted_label[i]=pred_label;
-		//test_matrix.push_back(vec);
 	}
-	fclose(fp);
-
-
 	
 	calculate_accuracy(testsize,given_label,predicted_label);
 	store_predicted_labels(testsize,predicted_label);

@@ -27,7 +27,7 @@ using namespace std;
 	return (-1*sum);
 }*/
 
-float my_entropy1(vector<float> v){
+float my_entropy1(vector<float>& v){
 	int size=v.size();
 	int i,count;
 	float prob,sum=0.0,val;
@@ -47,7 +47,7 @@ float my_entropy1(vector<float> v){
 	return -sum;
 }
 
-float gain(vector<float> label, vector<float> attr)
+float gain(vector<float>& label, vector<float>& attr)
 {
 	int size=attr.size(),i;
 	float val;

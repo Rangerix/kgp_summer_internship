@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 	int columncount=11;
 	int features=columncount-1;						//last col is label
 	int samples=0;
-	int i,j;
+	int i,j,k;
 	float a;
 
 	char c;
@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
 
 	int p=log2(features)+1;								//no of features in each tree
 	int no_tree=50;										//no of trees
+	int subcolsize=p+1;
 
 	printf("generating %d random features ...\n",p);
 	int *arr=(int*)malloc (p*sizeof(int));
@@ -69,51 +70,48 @@ int main(int argc, char *argv[])
 	}
 	free(arr);
 
-
-	float **traindata=(float**) malloc(samples*(sizeof(float*)));
-	for(i=0;i<samples;i++){
-		traindata[i]=(float*)malloc(columncount*sizeof(float));
+	int trainsize=samples;
+	vector<float> *traindata=new vector<float>[trainsize];
+	for(i=0;i<trainsize;i++){
+		traindata[i].assign(subcolsize,0);
 	}
 
+	printf("reading train data ...\n");
 	fp=fopen(argv[1],"r");
 	for(i=0;i<samples;i++){
+		k=0;
 		for(j=0;j<columncount;j++){
-			fscanf(fp,"%f",&traindata[i][j]);
-		}
-	}
-	fclose(fp);
-	char subtrain[]="subtrain.txt";
-	fp=fopen(subtrain,"w");
-	for(i=0;i<samples;i++){
-		for(j=0;j<columncount;j++){
+			fscanf(fp,"%f",&a);
 			if(ispresent[j]){
-				fprintf(fp,"%.2f ",traindata[i][j] );
+				traindata[i][k++]=a;
 			}
 		}
-		fprintf(fp,"\n");
 	}
 	fclose(fp);
-	free (traindata);
-
-
-	int testsample=0;
+	
+	int testsize=0;
 	fp=fopen(argv[2],"r");
 	for(c=getc(fp);c!=EOF;c=getc(fp)){
-		if(c=='\n') testsample++;
+		if(c=='\n') testsize++;
 	}
 	fclose(fp);
-	float** testdata=(float**)malloc(testsample*sizeof(float*));
-	for(i=0;i<testsample;i++){
-		testdata[i]=(float*)malloc(columncount*sizeof(float));
+	vector<float> *testdata=new vector<float>[testsize];
+	for(i=0;i<testsize;i++){
+		testdata[i].assign(subcolsize,0);
 	}
+
 	fp=fopen(argv[2],"r");
-	for(i=0;i<testsample;i++){
+	for(i=0;i<testsize;i++){
+		k=0;
 		for(j=0;j<columncount;j++){
-			fscanf(fp,"%f ",&testdata[i][j]);
+			fscanf(fp,"%f ",&a);
+			if(ispresent[j]){
+				testdata[i][k++]=a;
+			}
 		}
 	}
 	fclose(fp);
-	char subtest[]="subtest.txt";
+	/*char subtest[]="subtest.txt";
 	fp=fopen(subtest,"w");
 	for(i=0;i<testsample;i++){
 		for(j=0;j<columncount;j++){
@@ -124,7 +122,7 @@ int main(int argc, char *argv[])
 		fprintf(fp,"\n");
 	}
 	fclose(fp);
-	free (testdata);
-	main_function(subtrain,subtest);
+	free (testdata);*/
+	main_function(trainsize,testsize,subcolsize,traindata,testdata);
 	return 0;
 }
