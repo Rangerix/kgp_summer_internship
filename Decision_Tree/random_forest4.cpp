@@ -424,8 +424,8 @@ float* main_function(int trainsize,int testsize,int cccc,vector<float>* traindat
 
 int main(int argc, char *argv[])
 {
-	if(argc!=2) {
-		printf("./a.out dataset filename\n");
+	if(argc!=3) {
+		printf("./a.out dataset_filename nunber_of_trees_in_forest\n");
 		return 1;
 	}
 	FILE *fp;
@@ -584,7 +584,7 @@ int main(int argc, char *argv[])
 	for(i=0;i<testsize;i++)
 		given_label[i]=testmatrix[i][columncount-1];
 
-	int no_tree=50;										//no of trees	
+	int no_tree=atoi(argv[2]);										//no of trees	
 	int p=log2(features)+1;								//no of features in each tree
 	int subcolsize=p+1;
 
