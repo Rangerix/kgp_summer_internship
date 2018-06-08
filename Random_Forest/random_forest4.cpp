@@ -336,18 +336,21 @@ float test_data_on_decision_tree(vector<float> sample, tree_node* nodeptr,float 
 		temp.erase(temp.begin()+(nodeptr->split_on));
 		//cout<<"value in test : "<<value<<endl;
 		int i,child_index=-1;
+		float minval=100000.0;
 		//cout<<"children values : \n";
 		for(i=0;i<nodeptr->childrenValues.size();i++){
 			//cout<<(nodeptr->childrenValues[i])<<" ";
-			if(nodeptr->childrenValues[i]==value){
+			if(fabs(nodeptr->childrenValues[i]-value)<minval){
 				child_index=i;
-				break;
+				minval=fabs(nodeptr->childrenValues[i]-value);
 			}
 		}
 		//cout<<endl;
 		//cout<<"child_index : "<<child_index<<endl;
-		if(child_index==-1)
+		if(child_index==-1){
+			cout<<"default_label......................................................................."<<endl;
 			return default_label;
+		}
 		nodeptr=(nodeptr->children[child_index]);
 		if(nodeptr==NULL){
 			return default_label;
@@ -468,14 +471,14 @@ int main(int argc, char *argv[])
 	}
 
 	fp=fopen(argv[1],"r");
-	/*for(i=0;i<samples;i++)						//read the dataset from file
+	for(i=0;i<samples;i++)						//read the dataset from file
 	{
 		for(j=0;j<columncount;j++)
 			fscanf(fp,"%f ",&dataset[i][j]);
 	}
-	fclose(fp);*/
+	fclose(fp);
 
-	printf("setting precision as .2f ...\n");
+	/*printf("setting precision as .2f ...\n");
 	char tempdataset[]="tempdataset.txt";
 	FILE *fp1=fopen(tempdataset,"w");
 	for(i=0;i<samples;i++){
@@ -493,7 +496,7 @@ int main(int argc, char *argv[])
 		for(j=0;j<columncount;j++)
 			fscanf(fp1,"%f ",&dataset[i][j]);
 	}
-	fclose(fp1);
+	fclose(fp1);*/
 	//if precision not required, comment from ("setting precision as .2f ...\n")
 
 	//dataset reading done

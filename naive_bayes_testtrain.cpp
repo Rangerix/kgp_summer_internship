@@ -6,7 +6,7 @@ using namespace std;
 
 void delay(void){
 	cout<<"delay function called \n";
-	long long int i=9999999999;
+	long long int i=9199999999;
 	while(i--) ;
 }
 
@@ -52,9 +52,8 @@ void calculate_accuracy(int size,float* given, float* predicted){
 	printf("accuracy : %f \n", accu);
 }
 
-int naive_func(int trainsize,int testsize,float** trainmatrix,float **testmatrix)
+int naive_func(int trainsize,int testsize,int colcount,float** trainmatrix,float **testmatrix)
 {
-	int colcount=11;
 	int features=colcount-1;
 	int i,j,k,l;
 	float a,x;
@@ -216,11 +215,18 @@ int naive_func(int trainsize,int testsize,float** trainmatrix,float **testmatrix
 		for(j=0;j<features;j++){
 			x=testmatrix[i][j];
 			//find the index of x in uniquevalue table
+			float minval=10000.0;
+			int temp=0;
 			for(k=0;k<uniquecount[j];k++){
 				//if(fabs(uniquevalue[j][k]-x)<0.001) break;
-				if(uniquevalue[j][k]==x) break;
-
+				if(fabs(uniquevalue[j][k]-x)<minval){
+					temp=k;
+					minval=fabs(uniquevalue[j][k]-x);
+				} 
 			}
+			//if(minval!=0) printf("minval : %.10f\n",minval);
+			if(minval<2) 				//tolerance level : 2
+				k=temp;
 			//if k==uniquecount[j], then not found, else, k is the index of the unique value
 			//now find the prob(x/label); since here only two class, two variables are taken, for multiclass, an array 
 			//is needed; prob_table[j][k] and prob_table[j][k+uniquecount[j]]
@@ -266,7 +272,7 @@ int naive_func(int trainsize,int testsize,float** trainmatrix,float **testmatrix
 		
 	}
 	cout<<"classprob[0] : "<<classprob[0]<<" classprob[1] : "<<classprob[1]<<endl;
-	//printf("notfound : %d draw : %d\n",notfound,draw );
+	printf("notfound : %d draw : %d\n",notfound,draw );
 	calculate_accuracy(testsize,givenlabel,predictedlabel);
 	delete uniquevalue;
 	delete uniquecount;
@@ -291,6 +297,10 @@ int main(int argc,char* argv[]){
 		return 1;
 	}
 	char c;
+	
+
+
+	fp=fopen(argv[1],"r");
 	int linecount=0;
 	for(c=getc(fp);c!=EOF;c=getc(fp)){
 		if(c=='\n') linecount++;
@@ -313,14 +323,14 @@ int main(int argc,char* argv[]){
 	}
 
 	fp=fopen(argv[1],"r");
-	/*for(i=0;i<samples;i++)						//read the dataset from file
+	for(i=0;i<samples;i++)						//read the dataset from file
 	{
 		for(j=0;j<columncount;j++)
 			fscanf(fp,"%f ",&dataset[i][j]);
 	}
-	fclose(fp);*/
+	fclose(fp);
 
-	printf("setting precision as .2f ...\n");
+	/*printf("setting precision as .2f ...\n");
 	char tempdataset[]="tempdataset.txt";
 	FILE *fp1=fopen(tempdataset,"w");
 	for(i=0;i<samples;i++){
@@ -338,7 +348,7 @@ int main(int argc,char* argv[]){
 		for(j=0;j<columncount;j++)
 			fscanf(fp1,"%f ",&dataset[i][j]);
 	}
-	fclose(fp1);
+	fclose(fp1);*/
 	//if precision not required, comment from ("setting precision as .2f ...\n")
 
 	//dataset reading done
@@ -400,7 +410,7 @@ int main(int argc,char* argv[]){
 	}
 	delete testtrain;
 	printf("the testmatrix and trainmatrix is prepared\n");
-	naive_func(trainsize,testsize,trainmatrix,testmatrix);
+	naive_func(trainsize,testsize,columncount,trainmatrix,testmatrix);
 
 return 0;
 }
