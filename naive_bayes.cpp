@@ -3,6 +3,10 @@
 #include <cmath>
 using namespace std;
 
+void delay(void){
+	long long int i=9999999999;
+	while(i--) ;
+}
 
 int count_unique(int size,float* arr)
 {
@@ -84,9 +88,9 @@ int main(int argc,char* argv[])
 	int samples=rowcount;
 	//the size of uniquecount is colcount
 	int *uniquecount=get_unique_count(samples,colcount,dataset);
-	for(i=0;i<colcount;i++)
+	/*for(i=0;i<colcount;i++)
 		cout<<uniquecount[i]<<" ";
-	cout<<endl;
+	cout<<endl;*/
 
 	//uniquevalue table
 	float **uniquevalue=new float*[colcount];
@@ -155,7 +159,7 @@ int main(int argc,char* argv[])
 			}
 			//now consider the zero frequency case
 			if(label1==0||label2==0) {
-				printf("zero frequency\n");
+				//printf("zero frequency\n");
 				label2++;
 				label1++;
 			}
@@ -218,10 +222,15 @@ int main(int argc,char* argv[])
 			//now find the prob(x/label); since here only two class, two variables are taken, for multiclass, an array 
 			//is needed; prob_table[j][k] and prob_table[j][k+uniquecount[j]]
 			if(k==uniquecount[j]){
-				cout<<"not found "<<endl;
+				//cout<<"not found : "<<x<<"at : "<<i<<","<<j<<endl;
 				prob1=1.0;
 				prob2=1.0;
+				/*cout<<"Present values : "<<endl;
+				for(k=0;k<uniquecount[j];k++)
+					cout<<uniquevalue[j][k]<<" ";
+				cout<<endl;*/
 				notfound++;
+				//delay();
 			}
 			else{
 				prob1=probability_table[j][k];
@@ -229,16 +238,16 @@ int main(int argc,char* argv[])
 				//cout<<prob1<<" "<<prob2<<endl;
 				if(prob1==0) {
 					prob1=(float)(1.0)/samples;
-					printf("prob1 = 0\n"); 
+					//printf("prob1 = 0\n"); 
 				}
 				if(prob2==0){
 					prob2=float(1.0)/samples;
-					printf("prob2 = 0\n");
+					//printf("prob2 = 0\n");
 				}
 			}
 
 			//cout<<one<<" "<<two<<endl;
-			one *=(prob1*100);
+			one *=(prob1*100);		//this is to avoid floating point errors
 			two *=(prob2*100);
 			
 		}
