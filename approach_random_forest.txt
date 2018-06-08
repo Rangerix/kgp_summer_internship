@@ -10,7 +10,3 @@
 10. determine predicted_label considering frequency
 11. compare it with given_labels from test file.
 12. calculate accurcy
-
-
-72 
-67
