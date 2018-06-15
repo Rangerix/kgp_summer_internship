@@ -24,6 +24,10 @@ int main(int argc,char* argv[])
 
 	fp1=fopen(argv[1],"r");
 	fp2=fopen(argv[2],"w");
+	//if header is needed
+	for(i=0;i<colcount-1;i++)
+		fprintf(fp2,"%d,",i);
+	fprintf(fp2, "%d\n",i);
 	for(i=0;i<rowcount;i++){
 		for(j=0;j<colcount;j++){
 			fscanf(fp1,"%f ",&temprow[j]);

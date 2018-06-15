@@ -18,9 +18,10 @@ using namespace std;
 float my_entropy(int size,float* v){
 	int i,count;
 	float prob,sum=0.0,val;
+
 	set<float> s(v,v+size);
 	set<float>::iterator itr;
-	for(itr=s.begin();itr!=s.end();itr++){
+	for(itr=s.begin();itr!=s.end();itr++){  		//iterate over the unique values
 		val=*itr;
 		count=0;
 		for(i=0;i<size;i++){

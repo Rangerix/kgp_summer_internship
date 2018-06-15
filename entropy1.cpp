@@ -4,27 +4,6 @@
 #include <cmath>
 using namespace std;
 
-/*float my_entropy(vector<float> v){
-	int size=v.size();
-	int i,count;
-	float prob,sum;
-
-	for(i=0;i<size;i++)
-	{
-		//calculate probability
-		count=0;
-		for(int j=0;j<size;j++){
-			if(v[j]==v[i])
-				count++;
-		}
-		//count done
-		prob=(float)count/size;
-		cout<<v[i]<<" "<<prob<<endl;
-		sum+=prob*log(prob);
-	}
-	return (-1*sum);
-}*/
-
 float my_entropy1(vector<float> v){
 	int size=v.size();
 	int i,count;

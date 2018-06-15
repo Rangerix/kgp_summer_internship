@@ -1,0 +1,38 @@
+Random forest :
+	in decision_tree:
+	 decide_splitting_column (): it decides on which column we have to split the node
+	for all the features in the dataset, calculate gain(feature,label);
+	the feature with highest gain is the split column; 
+	in build_decision_tree() : there will be a parent node corresponding to this dataset. The node
+	keeps information like: is_leaf, the split column index, possible values of the split column, pointer to child nodes
+	Here, the split column means: we have to take each possible values present in the column and divide the parent dataset 
+	The divididing process is done in the following way:  in all child dataset, the split column will not be present
+	and each child dataset will be with the corresponding rows of a value of the split column
+	the parent node will point to these child nodes; then we call build_decision_tree() recursively
+	function is_homogenous(): decides if all the labels of a dataset(sub) is same. If yes, then it is a leaf. For a leaf,
+	the label value is stored
+
+	testing:
+
+	for testing a sample, from the root node, get the split col no; get the corresponding value
+	find which child represents the value, move the pointer to that child node
+	if no value is found, return the most frequent class
+	if a leaf is reached, return its label (this is the prediceted label by our model)
+
+
+	in random_forest:
+
+	take input dataset file name
+	crossvalidation = 10 : divide the dataset in 10 parts, use 9 for train, 1 for test
+	do this 10 times
+
+	no of trees in the random forest : 100 (user input)
+	in each tree, randomly select p=log(features)+1 features
+	reduce the train and test matrix by removing other columns
+	build_decision_tree on this train matrix
+
+	call the test function with the test data
+	store the label prediceted by this tree
+
+	after storing all the prediceted labels corresponding to each tree, decide prediceted label by votes. By votes means:
+	number of trees that predicts for a particular label;

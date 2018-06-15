@@ -501,7 +501,7 @@ int main(int argc, char *argv[])
 
 	//dataset reading done
 
-	int crossvalidation=10;
+	int crossvalidation=3;
 	printf("crossvalidation = %d \n",crossvalidation);
 	int testsize=linecount/crossvalidation;
 	int trainsize=linecount-testsize;

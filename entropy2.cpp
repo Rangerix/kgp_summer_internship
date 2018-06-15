@@ -2,17 +2,43 @@
 
 #include <iostream>
 #include <cmath>
-#include <set>
 using namespace std;
 
+int count_unique(int size,float* arr)
+{
+	int i,j,isunique;
+	int count=0;
+	for(i=0;i<size;i++)
+	{
+		isunique=1;
+		for(j=0;j<i&&isunique;j++){
+			if(arr[i]==arr[j]) isunique=0;
+		}
+		if(isunique) count++;
+	}
+	return count;
+}
 
 float my_entropy(int size,float* v){
-	int i,count;
+	int i,j,k,count;
 	float prob,sum=0.0,val;
-	set<float> s(v,v+size);
-	set<float>::iterator itr;
-	for(itr=s.begin();itr!=s.end();itr++){
-		val=*itr;
+	int n=count_unique(size,v);
+	int l=0;
+	float uniquevalue[n];
+	for(i=0;i<size;i++){
+		int isunique=1;
+		for(k=0;k<l;k++){
+			if(v[i]==uniquevalue[k]) isunique=0;
+		}
+		if(isunique) uniquevalue[l++]=v[i];
+	}
+	/*cout<<"l : "<<l<<" n : "<<n<<endl;
+	for(i=0;i<l;i++){
+		cout<<uniquevalue[i]<<" , ";
+	}
+	cout<<endl;*/
+	for(j=0;j<l;j++){											//iterate over the unique values
+		val=uniquevalue[j];
 		count=0;
 		for(i=0;i<size;i++){
 			if(v[i]==val)
@@ -22,12 +48,13 @@ float my_entropy(int size,float* v){
 		prob=(float)count/size;
 		sum+=prob*log2(prob);
 	}
+
 	return -sum;
 }
 
 float gain(int size,float* label, float* attr)
 {
-	int i;
+	int i,j,k;
 	float val;
 	float total=0.0;
 	float* subentr=new float[size];
@@ -50,12 +77,20 @@ float gain(int size,float* label, float* attr)
 	float answer=my_entropy(size,label);
 
 
+	int n=count_unique(size,subentr);
+	l=0;
+	float uniquevalue[n];
+	for(i=0;i<size;i++){
+		int isunique=1;
+		for(k=0;k<l;k++){
+			if(subentr[i]==uniquevalue[k]) isunique=0;
+		}
+		if(isunique) uniquevalue[l++]=subentr[i];
+	}
 	float prob=0,sum=0;
 	int count;
-	set<float> s(subentr,subentr+l);
-	set<float>::iterator itr;
-	for(itr=s.begin();itr!=s.end();itr++){
-		val=*itr;
+	for(j=0;j<l;j++){
+		val=uniquevalue[j];
 		count=0;
 		for(i=0;i<size;i++){
 			if(subentr[i]==val)
@@ -76,11 +111,11 @@ int main()
 	int n,i;
 	cout<<"how many : ";
 	cin>>n;
-	arr=new float[n];
-	/*for(int i=0;i<n;i++)
-		cin>>arr[i];*/
-	//cout<<my_entropy(n,arr)<<endl;
-
+	/*arr=new float[n];
+	for(int i=0;i<n;i++)
+		cin>>arr[i];
+	cout<<my_entropy(n,arr)<<endl;
+	*/
 	float *label = new float[n];
 	float *feature=new float[n];
 	cout<<"enter label : \n";

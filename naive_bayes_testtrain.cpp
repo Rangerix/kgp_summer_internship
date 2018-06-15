@@ -296,10 +296,16 @@ int main(int argc,char* argv[]){
 		printf("cannot open dataset file\n");
 		return 1;
 	}
+	char str[10000];
+	fgets(str,10000,fp);
+	fclose(fp);
+	int count=1;
+	for(int i=0;str[i]!='\0';i++)
+		if(str[i]==' ') count++;
+	int columncount=count;
+
+
 	char c;
-	
-
-
 	fp=fopen(argv[1],"r");
 	int linecount=0;
 	for(c=getc(fp);c!=EOF;c=getc(fp)){
@@ -309,7 +315,6 @@ int main(int argc,char* argv[]){
 	
 	
 	int rowcount=linecount;
-	int columncount=11;
 	printf("rowcount = %d columncount = %d\n",rowcount,columncount); 
 	int i,j,k,l;
 	float a;
