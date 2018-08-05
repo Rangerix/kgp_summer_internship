@@ -1,0 +1,10 @@
+100d: No CA
+101d: no CA
+102d: no CA
+103d: no ca
+103l: chainbreak originally exists. However fasta seq does not match with generated sequence.
+104d: no CA
+113d: no CA
+155c: UNKNOWN type of residue
+1a4k: abrupt numbering
+1bd1: no CA

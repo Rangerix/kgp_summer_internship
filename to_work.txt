@@ -1,0 +1,4 @@
+/home/Anupam/PhD/stride/stride/stride $id.pdb>$id.strd
+./makeblastdb -in aseq -parse_seqids -dbtype prot
+/home/twistgroup/kushal/ncbi-blast-2.2.30+/bin/blastp -query 1a0tp.seq -db /home/twistgroup/kushal/ncbi-blast-2.2.30+/bin/aseq -outfmt "7 qseqid sseqid qlen slen qstart qend sstart send evalue pident gaps score qseq sseq" -out 1a0tp.blast -evalue 0.00001
+
